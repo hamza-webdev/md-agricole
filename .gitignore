@@ -181,6 +181,10 @@ docker-compose.override.yml
 *.dump
 *.backup
 
+# Uploads (garder le dossier mais ignorer les fichiers)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # Prisma
 # Keep prisma/schema.prisma but ignore generated files
 /prisma/migrations/*/migration.sql

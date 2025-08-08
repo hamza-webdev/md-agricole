@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,19 +12,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus, Loader2, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { Product } from '@/lib/types';
 
-interface AddProductDialogProps {
+interface EditProductDialogProps {
+  product: Product;
   categories: Array<{
     id: string;
     name: string;
     slug: string;
   }>;
-  onProductAdded: () => void;
+  onClose: () => void;
+  onProductUpdated: () => void;
 }
 
 interface ProductFormData {
@@ -41,22 +43,21 @@ interface ProductFormData {
   isFeatured: boolean;
 }
 
-export function AddProductDialog({ categories, onProductAdded }: AddProductDialogProps) {
-  const [open, setOpen] = useState(false);
+export function EditProductDialog({ product, categories, onClose, onProductUpdated }: EditProductDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>({
-    name: '',
-    description: '',
-    price: 0,
-    brand: '',
-    model: '',
-    power: '',
-    stockQuantity: 0,
-    categoryId: '',
-    images: [],
-    isActive: true,
-    isFeatured: false,
+    name: product.name,
+    description: product.description || '',
+    price: product.price,
+    brand: product.brand || '',
+    model: product.model || '',
+    power: product.power || '',
+    stockQuantity: product.stockQuantity,
+    categoryId: product.categoryId,
+    images: product.images || [],
+    isActive: product.isActive,
+    isFeatured: product.isFeatured,
   });
 
   const handleInputChange = (field: keyof ProductFormData, value: any) => {
@@ -134,14 +135,13 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
         ...formData,
         features: formData.power ? [formData.power] : [],
         images: formData.images.filter(img => img.trim() !== ''),
-        // S'assurer que les champs vides sont envoyés comme chaînes vides ou null
         brand: formData.brand.trim() || undefined,
         model: formData.model.trim() || undefined,
         power: formData.power.trim() || undefined,
       };
 
-      const response = await fetch('/api/admin/products', {
-        method: 'POST',
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -151,49 +151,28 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Erreur lors de la création du produit');
+        throw new Error(result.error || 'Erreur lors de la modification du produit');
       }
 
-      toast.success('Produit créé avec succès !');
-      setOpen(false);
-      setFormData({
-        name: '',
-        description: '',
-        price: 0,
-        brand: '',
-        model: '',
-        power: '',
-        stockQuantity: 0,
-        categoryId: '',
-        images: [],
-        isActive: true,
-        isFeatured: false,
-      });
-
-      // Recharger la page pour voir le nouveau produit
-      window.location.reload();
+      toast.success('Produit modifié avec succès !');
+      onClose();
+      onProductUpdated();
 
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de la création du produit');
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la modification du produit');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="flex items-center space-x-2">
-          <Plus className="h-4 w-4" />
-          <span>Ajouter un produit</span>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Ajouter un nouveau produit</DialogTitle>
+          <DialogTitle>Modifier le produit</DialogTitle>
           <DialogDescription>
-            Remplissez les informations du produit agricole
+            Modifiez les informations du produit "{product.name}"
           </DialogDescription>
         </DialogHeader>
         
@@ -201,9 +180,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
           {/* Informations de base */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nom du produit *</Label>
+              <Label htmlFor="edit-name">Nom du produit *</Label>
               <Input
-                id="name"
+                id="edit-name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Ex: Tracteur John Deere 5082E"
@@ -212,9 +191,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="categoryId">Catégorie *</Label>
+              <Label htmlFor="edit-categoryId">Catégorie *</Label>
               <select
-                id="categoryId"
+                id="edit-categoryId"
                 value={formData.categoryId}
                 onChange={(e) => handleInputChange('categoryId', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -231,9 +210,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description *</Label>
+            <Label htmlFor="edit-description">Description *</Label>
             <Textarea
-              id="description"
+              id="edit-description"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Description détaillée du produit..."
@@ -245,9 +224,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
           {/* Détails techniques */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="brand">Marque</Label>
+              <Label htmlFor="edit-brand">Marque</Label>
               <Input
-                id="brand"
+                id="edit-brand"
                 value={formData.brand}
                 onChange={(e) => handleInputChange('brand', e.target.value)}
                 placeholder="Ex: John Deere"
@@ -255,9 +234,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="model">Modèle</Label>
+              <Label htmlFor="edit-model">Modèle</Label>
               <Input
-                id="model"
+                id="edit-model"
                 value={formData.model}
                 onChange={(e) => handleInputChange('model', e.target.value)}
                 placeholder="Ex: 5082E"
@@ -265,9 +244,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="power">Puissance</Label>
+              <Label htmlFor="edit-power">Puissance</Label>
               <Input
-                id="power"
+                id="edit-power"
                 value={formData.power}
                 onChange={(e) => handleInputChange('power', e.target.value)}
                 placeholder="Ex: 82 CV"
@@ -278,9 +257,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
           {/* Prix et stock */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Prix (TND) *</Label>
+              <Label htmlFor="edit-price">Prix (TND) *</Label>
               <Input
-                id="price"
+                id="edit-price"
                 type="number"
                 min="0"
                 step="0.01"
@@ -292,9 +271,9 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="stockQuantity">Quantité en stock *</Label>
+              <Label htmlFor="edit-stockQuantity">Quantité en stock *</Label>
               <Input
-                id="stockQuantity"
+                id="edit-stockQuantity"
                 type="number"
                 min="0"
                 value={formData.stockQuantity}
@@ -315,11 +294,11 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
                   accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
-                  id="image-upload"
+                  id="edit-image-upload"
                   disabled={uploadingImage}
                 />
                 <label
-                  htmlFor="image-upload"
+                  htmlFor="edit-image-upload"
                   className="cursor-pointer inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                 >
                   {uploadingImage ? (
@@ -330,13 +309,10 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
                   ) : (
                     <>
                       <Upload className="h-4 w-4" />
-                      <span>Choisir une image</span>
+                      <span>Ajouter une image</span>
                     </>
                   )}
                 </label>
-                <p className="text-xs text-gray-500 mt-2">
-                  JPG, PNG ou WebP. Taille max: 5MB
-                </p>
               </div>
 
               {/* Aperçu des images */}
@@ -378,7 +354,7 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
               />
               <span className="text-sm">Produit actif</span>
             </label>
-
+            
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -394,7 +370,7 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={onClose}
               disabled={isLoading}
             >
               Annuler
@@ -403,10 +379,10 @@ export function AddProductDialog({ categories, onProductAdded }: AddProductDialo
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Création...
+                  Modification...
                 </>
               ) : (
-                'Créer le produit'
+                'Modifier le produit'
               )}
             </Button>
           </DialogFooter>

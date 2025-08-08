@@ -23,10 +23,14 @@ const createProductSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🚀 Début de la création de produit');
+
     // Vérifier l'authentification et le rôle admin
     const session = await getServerSession(authOptions);
-    
+    console.log('👤 Session:', session?.user?.email, session?.user?.role);
+
     if (!session?.user || session.user.role !== 'ADMIN') {
+      console.log('❌ Non autorisé');
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 401 }
@@ -35,7 +39,10 @@ export async function POST(request: NextRequest) {
 
     // Parser et valider les données
     const body = await request.json();
+    console.log('📝 Données reçues:', body);
+
     const validatedData = createProductSchema.parse(body);
+    console.log('✅ Données validées:', validatedData);
 
     // Générer un slug unique à partir du nom
     const baseSlug = validatedData.name
@@ -52,6 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Créer le produit
+    console.log('💾 Création du produit avec slug:', slug);
     const product = await db.product.create({
       data: {
         name: validatedData.name,
@@ -72,19 +80,24 @@ export async function POST(request: NextRequest) {
         category: true
       }
     });
+    console.log('✅ Produit créé:', product.id);
+
+    const convertedProduct = convertPrismaProductToProduct(product);
 
     return NextResponse.json({
       success: true,
       message: 'Produit créé avec succès',
-      product
+      product: convertedProduct
     });
 
   } catch (error) {
-    console.error('Erreur lors de la création du produit:', error);
+    console.error('❌ Erreur lors de la création du produit:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'Pas de stack trace');
 
     if (error instanceof z.ZodError) {
+      console.error('🔍 Erreurs de validation Zod:', error.errors);
       return NextResponse.json(
-        { 
+        {
           error: 'Données invalides',
           details: error.errors
         },
@@ -93,7 +106,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      {
+        error: 'Erreur interne du serveur',
+        details: error instanceof Error ? error.message : 'Erreur inconnue'
+      },
       { status: 500 }
     );
   }

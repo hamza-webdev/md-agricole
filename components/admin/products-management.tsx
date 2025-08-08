@@ -6,16 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { AddProductDialog } from './add-product-dialog';
+import { EditProductDialog } from './edit-product-dialog';
+import { DeleteProductDialog } from './delete-product-dialog';
+import { ProductActions } from './product-actions';
 import {
-  Plus,
   Search,
-  Edit,
-  Trash2,
   Package,
   AlertTriangle,
+  Trash2,
   Eye
 } from 'lucide-react';
-import Link from 'next/link';
+import Image from 'next/image';
 import { Product } from '@/lib/types';
 import { toast } from 'sonner';
 
@@ -32,6 +33,8 @@ export function ProductsManagement({ products, categories }: ProductsManagementP
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [productList, setProductList] = useState(products);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
   // Fonction pour rafraîchir la liste des produits
   const handleProductAdded = async () => {
@@ -45,6 +48,39 @@ export function ProductsManagement({ products, categories }: ProductsManagementP
     } catch (error) {
       console.error('Erreur lors du rafraîchissement:', error);
       toast.error('Erreur lors du rafraîchissement de la liste');
+    }
+  };
+
+  // Fonction appelée après suppression d'un produit
+  const handleProductDeleted = () => {
+    setDeletingProduct(null);
+    handleProductAdded(); // Rafraîchir la liste
+  };
+
+  // Fonction pour basculer le statut actif/inactif
+  const handleToggleStatus = async (productId: string, isActive: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isActive: !isActive }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || 'Erreur lors de la mise à jour');
+      }
+
+      setProductList(prev => prev.map(product =>
+        product.id === productId ? { ...product, isActive: !isActive } : product
+      ));
+
+      toast.success(`Produit ${!isActive ? 'activé' : 'désactivé'} avec succès`);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la mise à jour');
     }
   };
 
@@ -98,11 +134,22 @@ export function ProductsManagement({ products, categories }: ProductsManagementP
           </select>
         </div>
 
-        {/* Bouton d'ajout */}
-        <AddProductDialog
-          categories={categories}
-          onProductAdded={handleProductAdded}
-        />
+        {/* Boutons d'action */}
+        <div className="flex items-center space-x-3">
+          <Button
+            variant="outline"
+            onClick={handleProductAdded}
+            className="flex items-center space-x-2"
+          >
+            <Package className="h-4 w-4" />
+            <span>Actualiser</span>
+          </Button>
+
+          <AddProductDialog
+            categories={categories}
+            onProductAdded={handleProductAdded}
+          />
+        </div>
       </div>
 
       {/* Statistiques rapides */}
@@ -196,13 +243,26 @@ export function ProductsManagement({ products, categories }: ProductsManagementP
                       <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-4 px-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                              <Package className="h-6 w-6 text-gray-400" />
+                            <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                              {product.images && product.images.length > 0 ? (
+                                <Image
+                                  src={product.images[0]}
+                                  alt={product.name}
+                                  width={48}
+                                  height={48}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Package className="h-6 w-6 text-gray-400" />
+                              )}
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">{product.name}</p>
                               {product.model && (
                                 <p className="text-sm text-gray-500">Modèle: {product.model}</p>
+                              )}
+                              {product.brand && (
+                                <p className="text-sm text-gray-500">Marque: {product.brand}</p>
                               )}
                             </div>
                           </div>
@@ -231,18 +291,13 @@ export function ProductsManagement({ products, categories }: ProductsManagementP
                           </Badge>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex items-center justify-end space-x-2">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/produits/${product.slug}`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                          <div className="flex items-center justify-end">
+                            <ProductActions
+                              product={product}
+                              onEdit={setEditingProduct}
+                              onDelete={setDeletingProduct}
+                              onToggleStatus={handleToggleStatus}
+                            />
                           </div>
                         </td>
                       </tr>
@@ -254,6 +309,25 @@ export function ProductsManagement({ products, categories }: ProductsManagementP
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog d'édition */}
+      {editingProduct && (
+        <EditProductDialog
+          product={editingProduct}
+          categories={categories}
+          onClose={() => setEditingProduct(null)}
+          onProductUpdated={handleProductAdded}
+        />
+      )}
+
+      {/* Dialog de suppression */}
+      {deletingProduct && (
+        <DeleteProductDialog
+          product={deletingProduct}
+          onClose={() => setDeletingProduct(null)}
+          onProductDeleted={handleProductDeleted}
+        />
+      )}
     </div>
   );
 }

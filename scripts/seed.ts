@@ -48,13 +48,38 @@ async function main() {
     }
   });
 
+  const seedsCategory = await prisma.category.create({
+    data: {
+      name: 'Semences',
+      slug: 'semences',
+      description: 'Graines et semences agricoles'
+    }
+  });
+
+  const fertilizersCategory = await prisma.category.create({
+    data: {
+      name: 'Engrais et fertilisants',
+      slug: 'engrais-fertilisants',
+      description: 'Produits pour la fertilisation des sols'
+    }
+  });
+
+  const livestockCategory = await prisma.category.create({
+    data: {
+      name: 'Élevage',
+      slug: 'elevage',
+      description: 'Équipements et matériel pour l\'élevage',
+      isActive: false // Catégorie inactive pour test
+    }
+  });
+
   // Créer produits
   await prisma.product.create({
     data: {
       name: 'Tracteur John Deere 5082E',
       slug: 'tracteur-john-deere-5082e',
       description: 'Tracteur agricole John Deere 5082E de 82 CV',
-      images: ['https://www.deere.africa/assets/images/5082E_01_13_3_MG_9614_F_large_large_c3d719aa0c9d0d5aef23a90c7ac659a821cf6d83.jpg'],
+      images: ['https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=500&h=400&fit=crop'],
       price: 97000,
       brand: 'John Deere',
       model: '5082E',
@@ -72,7 +97,7 @@ async function main() {
       name: 'Tracteur Massey Ferguson 240',
       slug: 'tracteur-massey-ferguson-240',
       description: 'Tracteur compact Massey Ferguson 240 de 50 CV',
-      images: ['https://gwtractors.com.au/wp-content/uploads/2021/02/Massey-Ferguson-240-Australia-scaled.jpg'],
+      images: ['https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=500&h=400&fit=crop'],
       price: 45000,
       brand: 'Massey Ferguson',
       model: '240',
@@ -91,7 +116,7 @@ async function main() {
       name: 'Charrue réversible 3 corps',
       slug: 'charrue-reversible-3-corps',
       description: 'Charrue réversible professionnelle pour labour profond',
-      images: ['https://example.com/charrue.jpg'],
+      images: ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&h=400&fit=crop'],
       price: 8500,
       brand: 'Kuhn',
       model: 'Multi-Master 123',
@@ -108,7 +133,7 @@ async function main() {
       name: 'Système d\'irrigation goutte à goutte',
       slug: 'irrigation-goutte-a-goutte',
       description: 'Kit complet d\'irrigation goutte à goutte pour 1 hectare',
-      images: ['https://example.com/irrigation.jpg'],
+      images: ['https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&h=400&fit=crop'],
       price: 2800,
       brand: 'Netafim',
       model: 'DripNet PC',
@@ -125,7 +150,7 @@ async function main() {
       name: 'Moissonneuse-batteuse',
       slug: 'moissonneuse-batteuse',
       description: 'Moissonneuse-batteuse compacte pour céréales',
-      images: ['https://example.com/moissonneuse.jpg'],
+      images: ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500&h=400&fit=crop'],
       price: 185000,
       brand: 'New Holland',
       model: 'TC5.80',
@@ -143,7 +168,7 @@ async function main() {
       name: 'Pulvérisateur traîné',
       slug: 'pulverisateur-traine',
       description: 'Pulvérisateur traîné pour traitement phytosanitaire',
-      images: ['https://example.com/pulverisateur.jpg'],
+      images: ['https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500&h=400&fit=crop'],
       price: 15600,
       brand: 'Amazone',
       model: 'UX 3200',
