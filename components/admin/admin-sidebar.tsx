@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Package,
@@ -13,7 +14,8 @@ import {
   X,
   Tractor,
   FolderOpen,
-  MessageSquare
+  MessageSquare,
+  FileText
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -48,6 +50,11 @@ const navigation = [
     icon: Users,
   },
   {
+    name: 'Factures',
+    href: '/admin/invoices',
+    icon: FileText,
+  },
+  {
     name: 'Messages',
     href: '/admin/messages',
     icon: MessageSquare,
@@ -66,6 +73,15 @@ const navigation = [
 
 export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>

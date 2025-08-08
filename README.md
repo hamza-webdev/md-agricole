@@ -419,3 +419,7 @@ Seeding terminé avec succès!
 👨‍💼 Admin: admin@mdagricole.tn / admin123
 👤 Client: john@doe.com / johndoe123
 
+npx next dev -p 3002
+
+
+

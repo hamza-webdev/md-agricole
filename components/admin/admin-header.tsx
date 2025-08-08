@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,11 +29,31 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
+  const [mounted, setMounted] = useState(false);
   const [notifications] = useState([
     { id: 1, message: 'Nouvelle commande reçue', time: '5 min' },
     { id: 2, message: 'Stock faible: Tracteur MF240', time: '1h' },
     { id: 3, message: 'Nouveau message client', time: '2h' },
   ]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" onClick={onMenuClick}>
+              <Menu className="h-5 w-5" />
+            </Button>
+            <h1 className="text-xl font-semibold text-gray-900">Chargement...</h1>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -66,9 +86,13 @@ export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
         {/* Right side */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative force-pointer-events"
+              >
                 <Bell className="h-5 w-5" />
                 {notifications.length > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -94,9 +118,12 @@ export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
           </DropdownMenu>
 
           {/* User menu */}
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                className="flex items-center space-x-2 force-pointer-events"
+              >
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>

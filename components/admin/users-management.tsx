@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { AddUserDialog } from './add-user-dialog';
 import { EditUserDialog } from './edit-user-dialog';
 import { CreateOrderDialog } from './create-order-dialog';
+import { UserOrdersDialog } from './user-orders-dialog';
 import { 
   Search, 
   Users, 
@@ -54,10 +55,20 @@ interface UsersManagementProps {
 }
 
 export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState(initialUsers);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [creatingOrderFor, setCreatingOrderFor] = useState<User | null>(null);
+  const [viewingOrdersFor, setViewingOrdersFor] = useState<User | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div>Chargement...</div>;
+  }
 
   // Filtrer les utilisateurs
   const filteredUsers = users.filter(user =>
@@ -327,9 +338,13 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center justify-end">
-                          <DropdownMenu>
+                          <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="force-pointer-events"
+                              >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -338,17 +353,23 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
                                 <Plus className="h-4 w-4 mr-2" />
                                 Créer une commande
                               </DropdownMenuItem>
+                              {user.totalOrders > 0 && (
+                                <DropdownMenuItem onClick={() => setViewingOrdersFor(user)}>
+                                  <ShoppingCart className="h-4 w-4 mr-2" />
+                                  Voir les commandes ({user.totalOrders})
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem onClick={() => setEditingUser(user)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Modifier
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => handleToggleStatus(user.id, user.isActive)}
                               >
                                 <Eye className="h-4 w-4 mr-2" />
                                 {user.isActive ? 'Désactiver' : 'Activer'}
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => handleDeleteUser(user.id, getFullName(user))}
                                 className="text-red-600 focus:text-red-600"
                                 disabled={user.totalOrders > 0}
@@ -383,6 +404,13 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
           user={creatingOrderFor}
           onClose={() => setCreatingOrderFor(null)}
           onOrderCreated={handleUserAdded}
+        />
+      )}
+
+      {viewingOrdersFor && (
+        <UserOrdersDialog
+          user={viewingOrdersFor}
+          onClose={() => setViewingOrdersFor(null)}
         />
       )}
     </div>

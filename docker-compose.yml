@@ -1,50 +1,73 @@
 version: '3.8'
 
 services:
-  db:
+  # Base de données PostgreSQL
+  postgres:
     image: postgres:15-alpine
-    container_name: md_agricole_db
+    container_name: md-agricole-db
     restart: unless-stopped
     environment:
+      POSTGRES_DB: md_agricole
       POSTGRES_USER: md_user
-      POSTGRES_PASSWORD: md_password_2024
-      POSTGRES_DB: md_agricole_db
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-md_secure_password_2024}
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"  # 5435 pour l'extérieur, mais en interne ça reste 5432
+      - "${POSTGRES_PORT:-5432}:5432"
     networks:
-      - md_network
+      - md-agricole-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U md_user -d md_agricole_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U md_user -d md_agricole"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Application Next.js
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: md_agricole_app
+    container_name: md-agricole-app
     restart: unless-stopped
-    ports:
-      - "3001:3000"  # Port externe 3001, interne 3000
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://md_user:md_password_2024@db:5432/md_agricole_db?schema=public
-      - NEXTAUTH_URL=http://localhost:3001
-      - NEXTAUTH_SECRET=your-super-secret-key-change-this-in-production
+      # Base de données
+      DATABASE_URL: postgresql://md_user:${POSTGRES_PASSWORD:-md_secure_password_2024}@postgres:5432/md_agricole
+
+      # NextAuth.js
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://mdagricole.zidani.org}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-md-agricole-super-secret-key-2024-change-me}
+
+      # Upload
+      UPLOAD_DIR: /app/public/uploads
+
+      # Environment
+      NODE_ENV: production
+
+    ports:
+      - "3007:3000"
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
     networks:
-      - md_network
+      - md-agricole-network
+    volumes:
+      - uploads_data:/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-networks:
-  md_network:
-    driver: bridge
+  # Supprimé car Nginx est déjà installé sur le VPS
 
 volumes:
   postgres_data:
     driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  md-agricole-network:
+    driver: bridge

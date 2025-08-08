@@ -42,12 +42,12 @@ export function ProductActions({ product, onEdit, onDelete, onToggleStatus }: Pr
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="sm"
-          className="hover:bg-gray-100 data-[state=open]:bg-gray-100"
+          className="hover:bg-gray-100 data-[state=open]:bg-gray-100 force-pointer-events"
           disabled={isLoading}
         >
           <MoreHorizontal className="h-4 w-4" />

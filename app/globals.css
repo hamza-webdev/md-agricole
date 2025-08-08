@@ -4,6 +4,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Corrections pour éviter les problèmes de navigation */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* S'assurer que les liens et boutons sont toujours cliquables */
+a, button, [role="button"] {
+  pointer-events: auto !important;
+  user-select: none;
+}
+
+/* Éviter les problèmes avec les overlays */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* Corrections pour les dialogs */
+[data-state="open"] {
+  pointer-events: auto !important;
+}
+
+/* Éviter les conflits d'événements */
+.no-pointer-events {
+  pointer-events: none;
+}
+
+.force-pointer-events {
+  pointer-events: auto !important;
+}
+
 @layer base {
   :root {
     /* Couleurs principales pour MD Agricole */
