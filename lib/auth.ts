@@ -1,4 +1,4 @@
-import { NextAuthOptions } from 'next-auth';
+import { NextAuthOptions, type User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import bcryptjs from 'bcryptjs';
@@ -13,7 +13,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
+      async authorize(credentials, _req): Promise<User | null> {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
@@ -35,15 +35,20 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        return {
+        const authUser: User = {
           id: user.id,
-          email: user.email,
-          name: user.name,
-          phone: user.phone || undefined,
-          address: user.address || undefined,
-          city: user.city || undefined,
-          role: user.role,
-        };
+          email: user.email ?? undefined,
+          name: user.name ?? undefined,
+        } as User;
+        // @ts-expect-error augmenting user fields
+        authUser.role = user.role;
+        // @ts-expect-error augmenting user fields
+        authUser.phone = user.phone ?? undefined;
+        // @ts-expect-error augmenting user fields
+        authUser.address = user.address ?? undefined;
+        // @ts-expect-error augmenting user fields
+        authUser.city = user.city ?? undefined;
+        return authUser;
       }
     })
   ],
