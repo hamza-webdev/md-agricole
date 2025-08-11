@@ -37,6 +37,7 @@ services:
       - DATABASE_URL=postgresql://md_user:md_password_2024@db:5432/md_agricole_db?schema=public
       - NEXTAUTH_URL=https://mdagricole.zidani.org
       - NEXTAUTH_SECRET=your-super-secret-key-change-this-in-production
+      - NEXTAUTH_TRUST_HOST=true
     depends_on:
       db:
         condition: service_healthy
