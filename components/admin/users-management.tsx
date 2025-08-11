@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useI18n } from '@/components/i18n/I18nProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +10,9 @@ import { AddUserDialog } from './add-user-dialog';
 import { EditUserDialog } from './edit-user-dialog';
 import { CreateOrderDialog } from './create-order-dialog';
 import { UserOrdersDialog } from './user-orders-dialog';
-import { 
-  Search, 
-  Users, 
+import {
+  Search,
+  Users,
   UserPlus,
   ShoppingCart,
   FileText,
@@ -55,6 +56,7 @@ interface UsersManagementProps {
 }
 
 export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
+  const { tau } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState(initialUsers);
@@ -134,10 +136,10 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
         throw new Error(result.error || 'Erreur lors de la mise à jour');
       }
 
-      setUsers(prev => prev.map(user => 
+      setUsers(prev => prev.map(user =>
         user.id === userId ? { ...user, isActive: !isActive } : user
       ));
-      
+
       toast.success(`Utilisateur ${!isActive ? 'activé' : 'désactivé'} avec succès`);
     } catch (error) {
       console.error('Erreur:', error);
@@ -176,7 +178,7 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Rechercher un utilisateur..."
+              placeholder={tau('admin.users.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 w-64"
@@ -192,7 +194,7 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
             className="flex items-center space-x-2"
           >
             <Users className="h-4 w-4" />
-            <span>Actualiser</span>
+            <span>{tau('admin.users.refresh')}</span>
           </Button>
 
           <AddUserDialog onUserAdded={handleUserAdded} />
@@ -206,19 +208,19 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
             <div className="flex items-center space-x-2">
               <Users className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm text-gray-600">Total utilisateurs</p>
+                <p className="text-sm text-gray-600">{tau('admin.users.totalUsers')}</p>
                 <p className="text-2xl font-bold">{users.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <Eye className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-gray-600">Actifs</p>
+                <p className="text-sm text-gray-600">{tau('admin.users.active')}</p>
                 <p className="text-2xl font-bold">
                   {users.filter(u => u.isActive).length}
                 </p>
@@ -232,7 +234,7 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
             <div className="flex items-center space-x-2">
               <ShoppingCart className="h-5 w-5 text-purple-600" />
               <div>
-                <p className="text-sm text-gray-600">Avec commandes</p>
+                <p className="text-sm text-gray-600">{tau('admin.users.withOrders')}</p>
                 <p className="text-2xl font-bold">
                   {users.filter(u => u.totalOrders > 0).length}
                 </p>
@@ -246,7 +248,7 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
             <div className="flex items-center space-x-2">
               <CreditCard className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="text-sm text-gray-600">CA total</p>
+                <p className="text-sm text-gray-600">{tau('admin.users.totalRevenue')}</p>
                 <p className="text-2xl font-bold">
                   {formatCurrency(users.reduce((sum, u) => sum + u.totalSpent, 0))}
                 </p>
@@ -267,20 +269,20 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
           {filteredUsers.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>Aucun utilisateur trouvé</p>
+              <p>{tau('admin.users.noneFound')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Utilisateur</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Contact</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Commandes</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">CA</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Statut</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Créé le</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-600">Actions</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">{tau('admin.users.userCol')}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">{tau('admin.users.contactCol')}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">{tau('admin.users.ordersCol')}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">{tau('admin.users.revenueCol')}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">{tau('admin.users.statusCol')}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">{tau('admin.users.createdAtCol')}</th>
+                    <th className="text-right py-3 px-4 font-medium text-gray-600">{tau('admin.users.actionsCol')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -295,7 +297,7 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
                             <p className="font-medium text-gray-900">{getFullName(user)}</p>
                             <p className="text-sm text-gray-500">{user.email}</p>
                             {user.idCardNumber && (
-                              <p className="text-xs text-gray-400">CIN: {user.idCardNumber}</p>
+                              <p className="text-xs text-gray-400">{tau('admin.users.cin')}: {user.idCardNumber}</p>
                             )}
                           </div>
                         </div>
@@ -325,7 +327,7 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
                         </span>
                       </td>
                       <td className="py-4 px-4">
-                        <Badge 
+                        <Badge
                           className={user.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
                         >
                           {user.isActive ? 'Actif' : 'Inactif'}
@@ -351,23 +353,23 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
                             <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuItem onClick={() => setCreatingOrderFor(user)}>
                                 <Plus className="h-4 w-4 mr-2" />
-                                Créer une commande
+                                {tau('admin.users.createOrder')}
                               </DropdownMenuItem>
                               {user.totalOrders > 0 && (
                                 <DropdownMenuItem onClick={() => setViewingOrdersFor(user)}>
                                   <ShoppingCart className="h-4 w-4 mr-2" />
-                                  Voir les commandes ({user.totalOrders})
+                                  {tau('admin.users.viewOrders')} ({user.totalOrders})
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem onClick={() => setEditingUser(user)}>
                                 <Edit className="h-4 w-4 mr-2" />
-                                Modifier
+                                {tau('admin.users.modify')}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleToggleStatus(user.id, user.isActive)}
                               >
                                 <Eye className="h-4 w-4 mr-2" />
-                                {user.isActive ? 'Désactiver' : 'Activer'}
+                                {user.isActive ? tau('admin.users.disable') : tau('admin.users.enable')}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleDeleteUser(user.id, getFullName(user))}
@@ -375,7 +377,7 @@ export function UsersManagement({ users: initialUsers }: UsersManagementProps) {
                                 disabled={user.totalOrders > 0}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Supprimer
+                                {tau('admin.users.delete')}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

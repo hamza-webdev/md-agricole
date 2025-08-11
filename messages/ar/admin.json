@@ -16,5 +16,8 @@
   "admin.viewSite": "عرض الموقع",
   "admin.settings": "الإعدادات",
   "admin.administrator": "مسؤول النظام"
+,
+  "admin.users.title": "المستخدمون"
+
 }
 

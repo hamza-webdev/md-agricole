@@ -28,11 +28,10 @@ interface AdminHeaderProps {
   user: any;
   onMenuClick: () => void;
 }
-  const { ta, locale, setLocale } = useI18n();
-
 
 export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
   const [mounted, setMounted] = useState(false);
+  const { ta } = useI18n();
   const [notifications] = useState([
     { id: 1, message: 'Nouvelle commande reçue', time: '5 min' },
     { id: 2, message: 'Stock faible: Tracteur MF240', time: '1h' },

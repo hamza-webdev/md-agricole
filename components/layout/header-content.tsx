@@ -118,6 +118,16 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
               </Link>
             )}
 
+            {/* Language Switcher */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover-lift"
+              onClick={() => setLocale(locale === 'fr' ? 'ar' : 'fr')}
+            >
+              {locale === 'fr' ? 'العربية' : 'Français'}
+            </Button>
+
             {/* Menu Mobile */}
             <Button
               variant="outline"
@@ -125,13 +135,6 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
               className="lg:hidden hover-lift shadow-soft hover:shadow-medium"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {/* Language Switcher */}
-              <div className="hidden lg:flex items-center space-x-2 ml-2">
-                <Button variant="outline" size="sm" onClick={() => setLocale(locale === 'fr' ? 'ar' : 'fr')}>
-                  {locale === 'fr' ? 'العربية' : 'Français'}
-                </Button>
-              </div>
-
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
