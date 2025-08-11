@@ -100,7 +100,7 @@ function Setup-Environment {
 DATABASE_URL="postgresql://md_user:md_password_2024@localhost:5432/md_agricole_db?schema=public"
 
 # NextAuth.js Configuration
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3007"
 NEXTAUTH_SECRET="$secretKey"
 "@
         

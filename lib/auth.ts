@@ -39,15 +39,11 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email ?? undefined,
           name: user.name ?? undefined,
-        } as User;
-        // @ts-expect-error augmenting user fields
-        authUser.role = user.role;
-        // @ts-expect-error augmenting user fields
-        authUser.phone = user.phone ?? undefined;
-        // @ts-expect-error augmenting user fields
-        authUser.address = user.address ?? undefined;
-        // @ts-expect-error augmenting user fields
-        authUser.city = user.city ?? undefined;
+          role: user.role,
+          phone: user.phone ?? undefined,
+          address: user.address ?? undefined,
+          city: user.city ?? undefined,
+        };
         return authUser;
       }
     })
@@ -57,21 +53,41 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      // Lors du login initial, propager les champs custom depuis `user`
       if (user) {
         token.role = user.role;
         token.phone = user.phone;
         token.address = user.address;
         token.city = user.city;
+        return token;
+      }
+      // Auto-réparation: si le token ne contient pas encore le rôle (sessions anciennes),
+      // aller chercher en base et l'injecter
+      if (!token.role && token.sub) {
+        try {
+          const dbUser = await db.user.findUnique({
+            where: { id: token.sub },
+            select: { role: true, phone: true, address: true, city: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.phone = dbUser.phone ?? undefined;
+            token.address = dbUser.address ?? undefined;
+            token.city = dbUser.city ?? undefined;
+          }
+        } catch (err) {
+          // ignore silently; token restera sans rôle et le middleware refusera l'accès admin
+        }
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
         session.user.id = token.sub || '';
-        session.user.role = token.role as string;
-        session.user.phone = token.phone as string;
-        session.user.address = token.address as string;
-        session.user.city = token.city as string;
+        if (token.role) session.user.role = token.role as string;
+        if (token.phone) session.user.phone = token.phone as string;
+        if (token.address) session.user.address = token.address as string;
+        if (token.city) session.user.city = token.city as string;
       }
       return session;
     },

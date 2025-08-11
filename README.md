@@ -61,7 +61,7 @@ docker run --name md-agricole-db \
   -e POSTGRES_USER=md_user \
   -e POSTGRES_PASSWORD=md_password_2024 \
   -e POSTGRES_DB=md_agricole_db \
-  -p 5432:5432 \
+  -p 5437:5432 \
   -d postgres:16-alpine
 ```
 
@@ -86,20 +86,20 @@ cp .env.example .env
 **Configuration pour Docker:**
 ```env
 # Base de données (avec Docker)
-DATABASE_URL="postgresql://md_user:md_password_2024@localhost:5432/md_agricole_db?schema=public"
+DATABASE_URL="postgresql://md_user:md_password_2024@localhost:5437/md_agricole_db?schema=public"
 
 # NextAuth.js
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3007"
 NEXTAUTH_SECRET="votre-clé-secrète-très-longue-et-sécurisée"
 ```
 
 **Configuration pour PostgreSQL local:**
 ```env
 # Base de données (installation locale)
-DATABASE_URL="postgresql://postgres:votre_mot_de_passe@localhost:5432/md_agricole_db?schema=public"
+DATABASE_URL="postgresql://postgres:votre_mot_de_passe@localhost:5437/md_agricole_db?schema=public"
 
 # NextAuth.js
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3007"
 NEXTAUTH_SECRET="votre-clé-secrète-très-longue-et-sécurisée"
 ```
 
@@ -130,7 +130,7 @@ npm run dev
 yarn dev
 ```
 
-L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
+L'application sera accessible sur [http://localhost:3007](http://localhost:3007)
 
 ## 🐳 Démarrage avec Docker (Alternative complète)
 
@@ -316,19 +316,19 @@ docker exec -it md-agricole-db env | grep POSTGRES
 ```
 
 **Connexion depuis l'application vers le conteneur:**
-- L'URL doit pointer vers `localhost:5432` (depuis l'hôte)
+- L'URL doit pointer vers `localhost:5437` (depuis l'hôte)
 - Ou vers `db:5432` (depuis un autre conteneur Docker)
 
 ### Configuration des URLs de base de données
 
 **Développement local (sans Docker):**
 ```env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/md_agricole_db?schema=public"
+DATABASE_URL="postgresql://postgres:password@localhost:5437/md_agricole_db?schema=public"
 ```
 
 **Développement avec PostgreSQL en container:**
 ```env
-DATABASE_URL="postgresql://md_user:md_password_2024@localhost:5432/md_agricole_db?schema=public"
+DATABASE_URL="postgresql://md_user:md_password_2024@localhost:5437/md_agricole_db?schema=public"
 ```
 
 **Application en container (docker-compose):**

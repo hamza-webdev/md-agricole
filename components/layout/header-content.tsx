@@ -101,7 +101,7 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
                   variant="outline"
                   size="lg"
                   className="hover-lift shadow-soft hover:shadow-medium hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
-                  onClick={() => signOut()}
+                  onClick={() => signOut({ callbackUrl: '/' })}
                 >
                   <LogOut className="h-5 w-5" />
                 </Button>
@@ -162,7 +162,7 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
                 {session ? (
                   <div className="flex flex-col space-y-3">
                     {/* Admin Dashboard Link Mobile */}
-                    {session?.user?.role === 'ADMIN' && (
+                    {session?.user?.role == 'ADMIN' && (
                       <Link
                         href="/admin"
                         onClick={() => setIsMenuOpen(false)}
@@ -186,7 +186,7 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
                       variant="outline"
                       className="w-full justify-start h-12 shadow-soft hover:shadow-medium hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
                       onClick={() => {
-                        signOut();
+                        signOut({ callbackUrl: '/' });
                         setIsMenuOpen(false);
                       }}
                     >

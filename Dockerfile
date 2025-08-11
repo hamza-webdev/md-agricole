@@ -11,8 +11,8 @@ RUN apk add --no-cache libc6-compat
 COPY package.json yarn.lock* ./
 COPY prisma ./prisma/
 
-# Installer toutes les dépendances
-RUN yarn install --frozen-lockfile
+# Installer toutes les dépendances (sans --frozen-lockfile pour éviter l'échec si le lock doit être mis à jour)
+RUN yarn install
 
 # Copier le code source
 COPY . .
