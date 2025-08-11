@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useI18n } from '@/components/i18n/I18nProvider';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,8 @@ interface AdminHeaderProps {
   user: any;
   onMenuClick: () => void;
 }
+  const { ta, locale, setLocale } = useI18n();
+
 
 export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
   const [mounted, setMounted] = useState(false);
@@ -76,7 +79,7 @@ export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher..."
+                placeholder={ta('admin.searchPlaceholder')}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-64"
               />
             </div>
@@ -102,7 +105,7 @@ export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuLabel>{ta('admin.notifications')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {notifications.map((notification) => (
                 <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3">
@@ -112,7 +115,7 @@ export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-center text-primary">
-                Voir toutes les notifications
+                {ta('admin.viewAllNotifications')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -129,13 +132,13 @@ export function AdminHeader({ user, onMenuClick }: AdminHeaderProps) {
                 </div>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-gray-500">Administrateur</p>
+                  <p className="text-xs text-gray-500">{ta('admin.administrator')}</p>
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-400" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+              <DropdownMenuLabel>{ta('admin.myAccount')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/profil" className="flex items-center">

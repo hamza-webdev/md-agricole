@@ -1,0 +1,20 @@
+{
+  "admin.sidebar.dashboard": "لوحة التحكم",
+  "admin.sidebar.products": "المنتجات",
+  "admin.sidebar.categories": "الفئات",
+  "admin.sidebar.orders": "الطلبات",
+  "admin.sidebar.users": "المستخدمون",
+  "admin.sidebar.invoices": "الفواتير",
+  "admin.sidebar.messages": "الرسائل",
+  "admin.sidebar.analytics": "الإحصائيات",
+  "admin.sidebar.settings": "الإعدادات",
+  "admin.panel": "الإدارة",
+  "admin.myAccount": "حسابي",
+  "admin.searchPlaceholder": "ابحث...",
+  "admin.notifications": "الإشعارات",
+  "admin.viewAllNotifications": "عرض كل الإشعارات",
+  "admin.viewSite": "عرض الموقع",
+  "admin.settings": "الإعدادات",
+  "admin.administrator": "مسؤول النظام"
+}
+

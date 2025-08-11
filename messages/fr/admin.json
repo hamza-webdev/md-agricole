@@ -1,0 +1,20 @@
+{
+  "admin.sidebar.dashboard": "Tableau de bord",
+  "admin.sidebar.products": "Produits",
+  "admin.sidebar.categories": "Catégories",
+  "admin.sidebar.orders": "Commandes",
+  "admin.sidebar.users": "Utilisateurs",
+  "admin.sidebar.invoices": "Factures",
+  "admin.sidebar.messages": "Messages",
+  "admin.sidebar.analytics": "Statistiques",
+  "admin.sidebar.settings": "Paramètres",
+  "admin.panel": "Administration",
+  "admin.myAccount": "Mon compte",
+  "admin.searchPlaceholder": "Rechercher...",
+  "admin.notifications": "Notifications",
+  "admin.viewAllNotifications": "Voir toutes les notifications",
+  "admin.viewSite": "Voir le site",
+  "admin.settings": "Paramètres",
+  "admin.administrator": "Administrateur"
+}
+

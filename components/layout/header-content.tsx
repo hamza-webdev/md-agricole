@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useI18n } from '@/components/i18n/I18nProvider';
 import {
   User,
   ShoppingCart,
@@ -27,12 +28,14 @@ interface HeaderContentProps {
 export function HeaderContent({ session, status }: HeaderContentProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { items } = useCart();
+  const { t, locale, setLocale } = useI18n();
 
   const cartItemsCount = items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   // Debug logging
   console.log('HeaderContent - Session status:', status);
   console.log('HeaderContent - Session data:', session);
+  console.log('HeaderContent - Locale:', locale);
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-border/50 shadow-soft">
@@ -45,7 +48,7 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
             </div>
             <div className="flex flex-col">
               <span className="text-2xl font-bold text-gradient">MD Agricole</span>
-              <span className="text-xs text-muted-foreground font-medium">Matériel Agricole</span>
+              <span className="text-xs text-muted-foreground font-medium">{t('site.tagline') || 'Matériel Agricole'}</span>
             </div>
           </Link>
 
@@ -53,15 +56,15 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
           <nav className="hidden lg:flex items-center space-x-1">
             <Link href="/" className="flex items-center space-x-2 px-4 py-2 rounded-lg text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 font-medium">
               <Home className="h-4 w-4" />
-              <span>Accueil</span>
+              <span>{t('nav.home')}</span>
             </Link>
             <Link href="/catalogue" className="flex items-center space-x-2 px-4 py-2 rounded-lg text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 font-medium">
               <Package className="h-4 w-4" />
-              <span>Catalogue</span>
+              <span>{t('nav.catalogue')}</span>
             </Link>
             <Link href="/contact" className="flex items-center space-x-2 px-4 py-2 rounded-lg text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 font-medium">
               <Phone className="h-4 w-4" />
-              <span>Contact</span>
+              <span>{t('nav.contact')}</span>
             </Link>
           </nav>
 
@@ -110,7 +113,7 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
               <Link href="/auth/connexion" className="hidden lg:block">
                 <Button size="lg" className="btn-primary hover-lift">
                   <LogIn className="h-5 w-5 mr-2" />
-                  Connexion
+                  {t('auth.login')}
                 </Button>
               </Link>
             )}
@@ -122,6 +125,13 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
               className="lg:hidden hover-lift shadow-soft hover:shadow-medium"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
+              {/* Language Switcher */}
+              <div className="hidden lg:flex items-center space-x-2 ml-2">
+                <Button variant="outline" size="sm" onClick={() => setLocale(locale === 'fr' ? 'ar' : 'fr')}>
+                  {locale === 'fr' ? 'العربية' : 'Français'}
+                </Button>
+              </div>
+
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
@@ -169,7 +179,7 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
                       >
                         <Button variant="outline" className="w-full justify-start h-12 shadow-soft hover:shadow-medium bg-primary/5 hover:bg-primary/10 text-primary border-primary/20">
                           <LayoutDashboard className="h-5 w-5 mr-3" />
-                          <span className="font-medium">Administration</span>
+                          <span className="font-medium">{t('auth.administration')}</span>
                         </Button>
                       </Link>
                     )}
@@ -191,7 +201,7 @@ export function HeaderContent({ session, status }: HeaderContentProps) {
                       }}
                     >
                       <LogOut className="h-5 w-5 mr-3" />
-                      <span className="font-medium">Déconnexion</span>
+                      <span className="font-medium">{t('auth.logout') || 'Déconnexion'}</span>
                     </Button>
                   </div>
                 ) : (

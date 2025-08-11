@@ -1,0 +1,15 @@
+{
+  "nav.home": "الرئيسية",
+  "nav.catalogue": "الكتالوج",
+  "nav.contact": "اتصل بنا",
+  "auth.login": "تسجيل الدخول",
+  "auth.admin": "الإدارة",
+  "auth.administration": "لوحة الإدارة",
+  "nav.language": "اللغة",
+  "lang.fr": "Français",
+  "lang.ar": "العربية"
+,
+  "auth.logout": "تسجيل الخروج",
+  "site.tagline": "معدات زراعية"
+
+}

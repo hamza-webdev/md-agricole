@@ -1,0 +1,15 @@
+{
+  "nav.home": "Accueil",
+  "nav.catalogue": "Catalogue",
+  "nav.contact": "Contact",
+  "auth.login": "Connexion",
+  "auth.admin": "Admin",
+  "auth.administration": "Administration",
+  "nav.language": "Langue",
+  "lang.fr": "Français",
+  "lang.ar": "العربية"
+,
+  "auth.logout": "Déconnexion",
+  "site.tagline": "Matériel Agricole"
+
+}

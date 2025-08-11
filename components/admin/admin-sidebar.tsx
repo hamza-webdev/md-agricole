@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/components/i18n/I18nProvider';
 import {
   LayoutDashboard,
   Package,
@@ -24,48 +25,49 @@ interface AdminSidebarProps {
 }
 
 const navigation = [
+  // labels are kept as keys; rendered text uses ta()
   {
-    name: 'Tableau de bord',
+    name: 'admin.sidebar.dashboard',
     href: '/admin',
     icon: LayoutDashboard,
   },
   {
-    name: 'Produits',
+    name: 'admin.sidebar.products',
     href: '/admin/products',
     icon: Package,
   },
   {
-    name: 'Catégories',
+    name: 'admin.sidebar.categories',
     href: '/admin/categories',
     icon: FolderOpen,
   },
   {
-    name: 'Commandes',
+    name: 'admin.sidebar.orders',
     href: '/admin/orders',
     icon: ShoppingCart,
   },
   {
-    name: 'Utilisateurs',
+    name: 'admin.sidebar.users',
     href: '/admin/users',
     icon: Users,
   },
   {
-    name: 'Factures',
+    name: 'admin.sidebar.invoices',
     href: '/admin/invoices',
     icon: FileText,
   },
   {
-    name: 'Messages',
+    name: 'admin.sidebar.messages',
     href: '/admin/messages',
     icon: MessageSquare,
   },
   {
-    name: 'Statistiques',
+    name: 'admin.sidebar.analytics',
     href: '/admin/analytics',
     icon: BarChart3,
   },
   {
-    name: 'Paramètres',
+    name: 'admin.sidebar.settings',
     href: '/admin/settings',
     icon: Settings,
   },
@@ -74,6 +76,8 @@ const navigation = [
 export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const { ta } = useI18n();
+
 
   useEffect(() => {
     setMounted(true);
@@ -87,7 +91,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
           onClick={onClose}
         />
@@ -140,7 +144,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                       isActive ? "text-white" : "text-gray-400 group-hover:text-gray-500"
                     )}
                   />
-                  {item.name}
+                  {ta(item.name)}
                 </Link>
               );
             })}
