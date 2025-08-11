@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, InvoiceStatus, PaymentMethod, PaymentStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -45,7 +45,7 @@ async function seedInvoices() {
       dueDate.setDate(dueDate.getDate() + 30);
 
       // Statut aléatoire
-      const statuses = ['PENDING', 'SENT', 'PAID'];
+      const statuses = [InvoiceStatus.PENDING, InvoiceStatus.SENT, InvoiceStatus.PAID];
       const status = statuses[i % statuses.length];
 
       console.log(`📄 Création facture ${invoiceNumber} pour commande ${order.orderNumber}`);
@@ -65,12 +65,12 @@ async function seedInvoices() {
       });
 
       // Créer des paiements pour les factures payées
-      if (status === 'PAID') {
+      if (status === InvoiceStatus.PAID) {
         const paymentCount = await prisma.payment.count();
         const paymentNumber = `PAY-${String(paymentCount + 1).padStart(6, '0')}`;
 
         // Méthodes de paiement aléatoires
-        const paymentMethods = ['CASH', 'CHECK', 'CARD', 'BANK_TRANSFER'];
+        const paymentMethods = [PaymentMethod.CASH, PaymentMethod.CHECK, PaymentMethod.CARD, PaymentMethod.BANK_TRANSFER];
         const paymentMethod = paymentMethods[i % paymentMethods.length];
 
         await prisma.payment.create({
@@ -78,7 +78,7 @@ async function seedInvoices() {
             paymentNumber,
             amount: totalAmount,
             paymentMethod,
-            status: 'COMPLETED',
+            status: PaymentStatus.COMPLETED,
             notes: `Paiement par ${paymentMethod.toLowerCase()}`,
             checkNumber: paymentMethod === 'CHECK' ? `CHK${Math.floor(Math.random() * 1000000)}` : undefined,
             cardLast4: paymentMethod === 'CARD' ? `${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` : undefined,

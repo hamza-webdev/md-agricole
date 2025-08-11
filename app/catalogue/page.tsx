@@ -1,7 +1,6 @@
 
 import { CatalogueClient } from '@/components/catalogue/catalogue-client';
 import { db } from '@/lib/db';
-import { Product } from '@/lib/types';
 import { convertPrismaProductToProduct } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -30,15 +29,12 @@ async function getCategoriesAndProducts() {
       ...cat,
       productCount: cat._count.products
     })),
-    products: products.map(convertPrismaProductToProduct)
+    products: products.map(product => convertPrismaProductToProduct(product))
   };
 }
 
 export default async function CataloguePage() {
   const { categories, products } = await getCategoriesAndProducts();
-
-  // Assurer le typage correct
-  const typedProducts: Product[] = products;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -51,9 +47,9 @@ export default async function CataloguePage() {
         </p>
       </div>
 
-      <CatalogueClient
-        initialCategories={categories}
-        initialProducts={typedProducts}
+      <CatalogueClient 
+        initialCategories={categories} 
+        initialProducts={products} 
       />
     </div>
   );

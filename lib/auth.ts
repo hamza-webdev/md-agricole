@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          name: user.name || undefined,
+          name: user.name,
           phone: user.phone || undefined,
           address: user.address || undefined,
           city: user.city || undefined,

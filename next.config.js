@@ -11,12 +11,8 @@ const nextConfig = {
   // Configuration des images
   images: {
     unoptimized: true,
-    domains: ['localhost', 'mdagricole.zidani.org'],
+    domains: ['localhost'],
   },
-
-  // Configuration pour la production
-  output: 'standalone',
-  swcMinify: true,
 
   // Configuration expérimentale pour Prisma
   experimental: {

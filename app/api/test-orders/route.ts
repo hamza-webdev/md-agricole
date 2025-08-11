@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       totalOrders: allOrders.length,
-      ordersWithoutInvoice: ordersWithoutInvoice.length,
+      ordersWithoutInvoiceCount: ordersWithoutInvoice.length,
       allOrders: allOrders.map(order => ({
         id: order.id,
         orderNumber: order.orderNumber,

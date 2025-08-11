@@ -1,74 +1,34 @@
-# Dockerfile pour MD Agricole - Application Next.js
-FROM node:18-alpine AS base
+# Dockerfile simple et fonctionnel pour MD Agricole
+FROM node:20-alpine
 
-# Install dependencies only when needed
-FROM base AS deps
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Installer les dépendances système
 RUN apk add --no-cache libc6-compat
-WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Copier les fichiers de package
+COPY package.json yarn.lock* ./
+COPY prisma ./prisma/
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Installer toutes les dépendances
+RUN yarn install --frozen-lockfile
+
+# Copier le code source
 COPY . .
 
-# Generate Prisma client
+# Générer le client Prisma
 RUN npx prisma generate
 
-# Build the application
-ENV NEXT_TELEMETRY_DISABLED 1
-RUN \
-  if [ -f yarn.lock ]; then yarn build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then pnpm build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Variables d'environnement
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
-# Production image, copy all the files and run next
-FROM base AS runner
-WORKDIR /app
+# Construire l'application (sans optimisations problématiques)
+RUN yarn build
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy Prisma files
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
-# Copy scripts for database operations
-COPY --from=builder /app/scripts ./scripts
-
-USER nextjs
-
+# Exposer le port
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
-# server.js is created by next build from the standalone output
-CMD ["node", "server.js"]
-
+# Démarrer l'application
+CMD ["yarn", "start"]

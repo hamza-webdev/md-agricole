@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { decimalToNumber } from '@/lib/decimal-utils';
 
 // Schéma de validation pour une nouvelle facture
 const createInvoiceSchema = z.object({
@@ -68,16 +69,26 @@ export async function GET() {
       }
     });
 
-    const invoicesWithStats = invoices.map(invoice => ({
-      ...invoice,
-      totalPaid: invoice.payments.reduce((sum, payment) => 
-        payment.status === 'COMPLETED' ? sum + Number(payment.amount) : sum, 0
-      ),
-      remainingAmount: Number(invoice.totalAmount) - invoice.payments.reduce((sum, payment) => 
-        payment.status === 'COMPLETED' ? sum + Number(payment.amount) : sum, 0
-      ),
-      paymentCount: invoice._count.payments
-    }));
+    const invoicesWithStats = invoices.map(invoice => {
+      const totalPaid = invoice.payments.reduce((sum, payment) =>
+        payment.status === 'COMPLETED' ? sum + decimalToNumber(payment.amount) : sum, 0
+      );
+      const totalAmount = decimalToNumber(invoice.totalAmount);
+
+      return {
+        ...invoice,
+        totalAmount,
+        taxAmount: decimalToNumber(invoice.taxAmount),
+        discountAmount: decimalToNumber(invoice.discountAmount),
+        totalPaid,
+        remainingAmount: totalAmount - totalPaid,
+        paymentCount: invoice._count.payments,
+        payments: invoice.payments.map(payment => ({
+          ...payment,
+          amount: decimalToNumber(payment.amount)
+        }))
+      };
+    });
 
     return NextResponse.json(invoicesWithStats);
 

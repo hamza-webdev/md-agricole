@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { OrderStatus } from '@prisma/client';
 
 // Schéma de validation pour une nouvelle commande
 const createOrderSchema = z.object({
@@ -41,7 +42,13 @@ export async function GET(request: NextRequest) {
     const whereClause = withoutInvoice ? {
       invoice: null,
       status: {
-        in: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED']
+        in: [
+          OrderStatus.PENDING,
+          OrderStatus.CONFIRMED,
+          OrderStatus.PROCESSING,
+          OrderStatus.SHIPPED,
+          OrderStatus.DELIVERED
+        ]
       }
     } : {};
 
@@ -126,7 +133,7 @@ export async function POST(request: NextRequest) {
 
     // Vérifier la disponibilité des produits et calculer le total
     let calculatedTotal = 0;
-    const productChecks = [];
+    const productChecks: any[] = [];
 
     for (const item of validatedData.orderItems) {
       const product = await db.product.findUnique({

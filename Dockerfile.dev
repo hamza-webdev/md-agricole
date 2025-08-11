@@ -10,7 +10,7 @@ RUN apk add --no-cache libc6-compat
 # Copier les fichiers de configuration des dépendances
 COPY package.json yarn.lock* ./
 COPY prisma ./prisma/
- ADD source dest
+
 # Installer les dépendances
 RUN yarn install
 

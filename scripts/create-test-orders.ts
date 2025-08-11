@@ -47,7 +47,7 @@ async function createTestOrders() {
       const orderNumber = `CMD-${String(orderCount + 1).padStart(6, '0')}`;
 
       const quantity = Math.floor(Math.random() * 3) + 1; // 1-3 quantité
-      const unitPrice = product.price;
+      const unitPrice = Number(product.price);
       const totalAmount = quantity * unitPrice;
 
       console.log(`📝 Création commande ${orderNumber} pour ${user.firstName} ${user.lastName}`);

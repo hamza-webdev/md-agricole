@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { AdminInvoicesClient } from '@/components/admin/admin-invoices-client';
+import { decimalToNumber } from '@/lib/decimal-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,16 +51,40 @@ async function getInvoices() {
     }
   });
 
-  return invoices.map(invoice => ({
-    ...invoice,
-    totalPaid: invoice.payments.reduce((sum, payment) => 
-      payment.status === 'COMPLETED' ? sum + Number(payment.amount) : sum, 0
-    ),
-    remainingAmount: Number(invoice.totalAmount) - invoice.payments.reduce((sum, payment) => 
-      payment.status === 'COMPLETED' ? sum + Number(payment.amount) : sum, 0
-    ),
-    paymentCount: invoice._count.payments
-  }));
+  return invoices.map(invoice => {
+    // Calculer le total payé
+    const totalPaid = invoice.payments.reduce((sum, payment) =>
+      payment.status === 'COMPLETED' ? sum + decimalToNumber(payment.amount) : sum, 0
+    );
+
+    // Convertir le montant total
+    const totalAmount = decimalToNumber(invoice.totalAmount);
+
+    return {
+      ...invoice,
+      // Convertir les types Decimal en number
+      totalAmount,
+      taxAmount: decimalToNumber(invoice.taxAmount),
+      discountAmount: decimalToNumber(invoice.discountAmount),
+      // Calculer les montants payés et restants
+      totalPaid,
+      remainingAmount: totalAmount - totalPaid,
+      paymentCount: invoice._count.payments,
+      // Convertir les montants des items de commande
+      order: {
+        ...invoice.order,
+        orderItems: invoice.order.orderItems.map(item => ({
+          ...item,
+          unitPrice: decimalToNumber(item.unitPrice)
+        }))
+      },
+      // Convertir les montants des paiements
+      payments: invoice.payments.map(payment => ({
+        ...payment,
+        amount: decimalToNumber(payment.amount)
+      }))
+    };
+  });
 }
 
 export default async function AdminInvoicesPage() {

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { decimalToNumber } from '@/lib/decimal-utils';
 
 // Schéma de validation pour la modification d'une facture
 const updateInvoiceSchema = z.object({
@@ -81,9 +82,9 @@ export async function PATCH(
 
     // Recalculer le montant total si les taxes ou remises changent
     if (validatedData.taxAmount !== undefined || validatedData.discountAmount !== undefined) {
-      const baseAmount = Number(existingInvoice.order.totalAmount);
-      const taxAmount = validatedData.taxAmount ?? existingInvoice.taxAmount;
-      const discountAmount = validatedData.discountAmount ?? existingInvoice.discountAmount;
+      const baseAmount = decimalToNumber(existingInvoice.order.totalAmount);
+      const taxAmount = validatedData.taxAmount ?? decimalToNumber(existingInvoice.taxAmount);
+      const discountAmount = validatedData.discountAmount ?? decimalToNumber(existingInvoice.discountAmount);
       const newTotalAmount = baseAmount + taxAmount - discountAmount;
 
       if (newTotalAmount < 0) {
